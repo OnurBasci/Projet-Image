@@ -6,17 +6,20 @@ import math
 
 def main():
     img_path = r"C:\Users\onurb\PycharmProjects\Projet-Image\ImagesProjetL3\13.jpg"
-    img = cv.imread(img_path, cv.IMREAD_GRAYSCALE)
 
-    threshed = binary_normal_or_inverse(img, 128)
-
-    dessiner(threshed, 'thresh')
-
-    border = extract_border(img, threshed)
+    border = extract_tableau(img_path)
 
     dessiner(border, "border")
 
 
+def extract_tableau(img_path):
+    img = cv.imread(img_path, cv.IMREAD_GRAYSCALE)
+
+    threshed = binary_normal_or_inverse(img, 128)
+
+    border = extract_border(img, threshed)
+
+    return border
 
 
 def binary_normal_or_inverse(img, seuil):
@@ -72,10 +75,6 @@ def extract_border(base_img, threshed):
 
     #extract the board on the original image
     cutted[~mask] = 0
-
-    print(cutted)
-
-    dessiner(cutted, "cutted")
 
     cutted = cutted[coordinates[1]:coordinates[3], coordinates[0]:coordinates[2]]
 
