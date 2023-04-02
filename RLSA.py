@@ -6,7 +6,7 @@ from filter import filter_small_big_components
 def main():
     img_path = r"C:\Users\onurb\PycharmProjects\Projet-Image\ImagesProjetL3\13.jpg"
 
-    rlsa_img = apply_rlsa(img_path)
+    rlsa_img, border = apply_rlsa(img_path)
     dessiner(rlsa_img, "rlsa")
 
 
@@ -15,7 +15,11 @@ def apply_rlsa(img_path):
     dessiner(border_img, "border")
 
     # Apply a threshold to create a binary image
-    ret, binary_image = cv.threshold(border_img, 127, 255, cv.THRESH_BINARY)
+    canny = cv.Canny(border_img, 50, 200, None, 3)
+    #dessiner(canny, "canny")
+
+    ret, binary_image = cv.threshold(canny, 127, 255, cv.THRESH_BINARY)
+
     # binary_image = binary_normal_or_inverse(border_img, 128)
     dessiner(binary_image, "binarie")
 
@@ -30,9 +34,9 @@ def apply_rlsa(img_path):
     #filtered = filter_small_big_components(binary_image)
     #dessiner(filtered,"filtre")
 
-    rlsa_image = rlsa(binary_image, 10)
+    rlsa_image = rlsa(binary_image, 5)
     #dessiner(rlsa_image, "rlsa filtered")
-    return rlsa_image
+    return rlsa_image, border_img
 
 
 def rlsa(binary_image, t_seuil):
