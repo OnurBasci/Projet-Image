@@ -5,7 +5,7 @@ import math
 
 
 def main():
-    img_path = r"C:\Users\onurb\PycharmProjects\Projet-Image\ImagesProjetL3\13.jpg"
+    img_path = r"C:\Users\onurb\PycharmProjects\Projet-Image\ImagesProjetL3\80.jpg"
 
     border = extract_tableau(img_path)
 

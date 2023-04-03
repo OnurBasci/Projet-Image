@@ -3,7 +3,7 @@ import cv2 as cv
 from board_detection_v2 import extract_tableau, dessiner, binary_normal_or_inverse
 
 MAX_LENGTH_RATIO = 0.1
-MIN_LENGTH_RATIO = 0.03
+MIN_LENGTH_RATIO = 0.01
 
 def main():
     img_path = r"C:\Users\onurb\PycharmProjects\Projet-Image\ImagesProjetL3\13.jpg"
