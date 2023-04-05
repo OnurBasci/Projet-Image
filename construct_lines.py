@@ -2,12 +2,13 @@ import numpy as np
 import cv2 as cv
 from RLSA import dessiner, apply_rlsa
 from filter import filter_small_big_components
+from copy import deepcopy
 
 MEDIAN_KERNEL_SIZE = 7
 
 
 def main():
-    img_path = r"C:\Users\onurb\PycharmProjects\Projet-Image\ImagesProjetL3\13.jpg"
+    img_path = r"C:\Users\onurb\PycharmProjects\Projet-Image\ImagesProjetL3\1.jpg"
     #buff = r"C:\Users\onurb\PycharmProjects\Projet-Image\component3.png"
     construct_lines(img_path)
     #buffer(buff)
@@ -16,7 +17,7 @@ def main():
 
 def construct_lines(img_path):
     rlsa, border_image = apply_rlsa(img_path)
-    print((border_image.shape[0], border_image.shape[1]))
+
     dessiner(rlsa,"rlsa")
     #apply median to remove lines
     med = cv.medianBlur(rlsa, ksize = MEDIAN_KERNEL_SIZE)
@@ -29,9 +30,10 @@ def construct_lines(img_path):
     dessiner(filter, "median")
 
     #lines, words = get_lines(filter)
-    lines, contents = get_lines_v2(filter)
+    lines, contents, content_v_list = get_lines_v2(filter)
 
-    remove_subsets(lines, contents, border_image)
+    remove_subsets(lines, contents, border_image, content_v_list)
+
 
     draw_lines(lines, border_image)
 
@@ -39,7 +41,6 @@ def construct_lines(img_path):
 def buffer(img_path):
     img = cv.imread(img_path, cv.IMREAD_GRAYSCALE)
     lines, contents = get_lines_v2(img)
-    #print(lines)
     remove_subsets(lines, contents, img)
     draw_lines(lines, img)
 
@@ -107,9 +108,10 @@ def get_lines_v2(rlsa_image):
 
     lines = []
     contents = []
+    content_v_list = []
     line = []
 
-    discovered = []
+    discovered_as_second_or_more = []
 
     masks, labels = get_masks(rlsa_image)
 
@@ -120,14 +122,13 @@ def get_lines_v2(rlsa_image):
 
         #a list representing the contents (label) of the line
         content = {i+1}
+        content_v = [i+1]
 
 
         while Found:
-            #print("hello")
             line.append(mask_buf)
             word_length = mask_buf[1][3] - mask_buf[1][1]
             distance_between_words = 2 * word_length
-            #print("hello")
             #get the box from the end of the word to 3 times more
             buf_img = rlsa_image[mask_buf[1][1]: mask_buf[1][3], mask_buf[1][2]: mask_buf[1][2] + distance_between_words]
 
@@ -141,26 +142,29 @@ def get_lines_v2(rlsa_image):
 
             if coordinates[0].size > 0:
                 #get the next mask
-                white_point = (mask_buf[1][1] + coordinates[0][0], mask_buf[1][2] + coordinates[1][0])
+                for i in range(coordinates[0].size):
+                    white_point = (mask_buf[1][1] + coordinates[0][i], mask_buf[1][2] + coordinates[1][i])
 
-                # Get the label of the connected component that contains the given point
-                label = labels[white_point]
+                    # Get the label of the connected component that contains the given point
+                    label = labels[white_point]
+
+                    if not(label in discovered_as_second_or_more):
+                        break
 
                 content.add(label)
+                content_v.append(label)
 
                 # if already found recalculate
                 #if label in discovered:
                 #    remove_multiple_apparence(lines, contents, label)
 
                 # if already discovered remove the line
-                """if label in discovered:
-                    print(label)
-                    remove_multiple_apparence(lines, contents, i + 1)"""
 
 
                 #dessiner(masks[label][0], "labeled")
                 #discovered.append(label)
                 #dessiner(mask_buf[0], "mask buf")
+                discovered_as_second_or_more.append(label)
                 mask_buf = masks[label - 1]
 
                 continue
@@ -169,12 +173,14 @@ def get_lines_v2(rlsa_image):
                 if check_biggest(contents, content):
                     #add the content
                     contents.append(content)
+                    content_v_list.append(content_v)
 
                     lines.append(line)
+
                 Found = False
                 line = []
 
-    return lines, contents
+    return lines, contents, content_v_list
 
 
 def check_biggest(contents, content):
@@ -185,7 +191,7 @@ def check_biggest(contents, content):
 
     return biggest
 
-def remove_subsets(lines, contents, base_img):
+def remove_subsets(lines, contents, base_img, content_v_list):
     """
     this function is to remove multiple box surrounding same object
     """
@@ -193,7 +199,7 @@ def remove_subsets(lines, contents, base_img):
 
     #find the indexes
     for i, c in enumerate(contents):
-        for c2 in contents:
+        for j, c2 in enumerate(contents):
             if c is c2:
                 continue
             if c.issubset(c2):
@@ -202,8 +208,50 @@ def remove_subsets(lines, contents, base_img):
 
     #remove the elements
     for index in sorted(to_delete_index, reverse=True):
-        #print(index)
         del lines[index]
+        del contents[index]
+        del content_v_list[index]
+
+    #remeove the lines that have intersections
+    to_change_index_i = []
+    to_change_index_j = []
+
+    contents_copy = deepcopy(contents)
+    #contents_copy.reverse()
+
+
+    for i, c1 in enumerate(contents_copy):
+        for j, c2 in enumerate(contents_copy):
+            if i >= j:
+                continue
+            if len(c1.intersection(c2)) > 0:
+                to_change_index_i.append(i)
+                to_change_index_j.append(j)
+                break
+
+    # remove the elements
+    for i,j in zip(to_change_index_i, to_change_index_j):
+        delete_intersection(lines[i], lines[j], content_v_list[i])
+        #delete_intersection_v2(lines[i], lines[j], content_v_list[i], content_v_list[j])
+        #del lines[index]
+
+
+def delete_intersection(line1, line2, list1):
+    to_remove = []
+    for i in range(min(len(line1), len(line2))):
+        if line1[len(line1) - 1 - i][1] == line2[len(line2) - 1 - i][1]:
+            #print((line1[len(line1) - 1 - i][1], line2[len(line2) - 1 - i][1]))
+        #if line1[len(line1) - 1 - i][1][2] == line2[len(line2) - 1 - i][1][2] and line1[len(line1) - 1 - i][1][3] == line2[len(line2) - 1 - i][1][3]:
+            #print("hello")
+            #line1.remove(line1[len(line1) - 1 - i])
+            to_remove.append(len(line1) - 1 - i)
+        else:
+            break
+
+    for index in to_remove:
+        del line1[index]
+        del list1[index]
+
 
 
 def get_masks(rlsa_image):
@@ -228,22 +276,37 @@ def get_masks(rlsa_image):
 
     return masks, labels
 
+def check_same(list):
+    same = False
+    ind = 0
+    for i, elem in enumerate(list):
+        for j, elem2 in enumerate(list):
+            if elem is elem2:
+                continue
+            if elem[-1] == elem2[-1]:
+                print(f"same elems : {elem}, {elem2}")
+                ind = (i,j)
+                same = True
+                break
+    print(same)
+    return ind
 
 def draw_lines(lines, base_img):
     mask = np.zeros((base_img.shape[0], base_img.shape[1]), dtype=np.uint8)
     base = base_img.copy()
 
-    print(lines)
+    #print(lines)
 
     for line in lines:
+        if len(line) <= 0:
+            continue
+
         left_top = (line[0][1][0], line[0][1][1])
         left_down = (line[0][1][0], line[0][1][3])
         right_top = (line[-1][1][2], line[-1][1][1])
         right_down = (line[-1][1][2], line[-1][1][3])
 
         #(start_pos, end_pos)
-
-        print((left_top, right_down))
 
         #draw polygon
         pts = np.array([[left_top[0], left_top[1]], [left_down[0], left_down[1]], [right_down[0], right_down[1]], [right_top[0], right_top[1]]], np.int32)
