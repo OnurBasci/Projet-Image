@@ -4,11 +4,11 @@ from RLSA import dessiner, apply_rlsa
 from filter import filter_small_big_components
 from copy import deepcopy
 
-MEDIAN_KERNEL_SIZE = 7
+MEDIAN_KERNEL_SIZE = 9
 
 
 def main():
-    img_path = r"C:\Users\onurb\PycharmProjects\Projet-Image\ImagesProjetL3\1.jpg"
+    img_path = r"C:\Users\onurb\PycharmProjects\Projet-Image\training_data\11.jpg"
     #buff = r"C:\Users\onurb\PycharmProjects\Projet-Image\component3.png"
     construct_lines(img_path)
     #buffer(buff)
@@ -25,12 +25,12 @@ def construct_lines(img_path):
     dessiner(med, "median")
 
     #filter
-    filter = filter_small_big_components(med)
+    #filter = filter_small_big_components(med)
 
-    dessiner(filter, "median")
+    #dessiner(filter, "median")
 
     #lines, words = get_lines(filter)
-    lines, contents, content_v_list = get_lines_v2(filter)
+    lines, contents, content_v_list = get_lines_v2(med)
 
     remove_subsets(lines, contents, border_image, content_v_list)
 

@@ -1,11 +1,12 @@
 import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
+from rotation_outil import get_ellipse
 import math
 
 
 def main():
-    img_path = r"C:\Users\onurb\PycharmProjects\Projet-Image\ImagesProjetL3\80.jpg"
+    img_path = r"C:\Users\onurb\PycharmProjects\Projet-Image\training_data\1.jpg"
 
     border = extract_tableau(img_path)
 
@@ -15,11 +16,11 @@ def main():
 def extract_tableau(img_path):
     img = cv.imread(img_path, cv.IMREAD_GRAYSCALE)
 
-    threshed = binary_normal_or_inverse(img, 128)
+    threshed = binary_normal_or_inverse(img, 150)
 
-    border = extract_border(img, threshed)
+    border, E = extract_border(img, threshed)
 
-    return border
+    return border, E
 
 
 def binary_normal_or_inverse(img, seuil):
@@ -67,6 +68,9 @@ def extract_border(base_img, threshed):
     cutted = base_img.copy()
 
     largest_connected, coordinates = cut_largest_connected_component(threshed)
+    #rotate the image
+    E = get_ellipse(largest_connected)
+
 
     #fill the holes in the mask
     kernel = cv.getStructuringElement(cv.MORPH_RECT,(10,10))
@@ -78,7 +82,7 @@ def extract_border(base_img, threshed):
 
     cutted = cutted[coordinates[1]:coordinates[3], coordinates[0]:coordinates[2]]
 
-    return cutted
+    return cutted, E
 
 
 def cut_largest_connected_component(img):
