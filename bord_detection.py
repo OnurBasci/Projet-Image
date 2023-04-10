@@ -2,32 +2,52 @@ import numpy as np
 import cv2 as cv
 import matplotlib.pyplot as plt
 import math
+import os
 
 #premièrement dillatation
 #
 
-MEDIAN_KERNEL_SIZE = 21
-GRAY_TOLERANCE = 8
+#MEDIAN_KERNEL_SIZE_COEFFICIENT = 50
+KERNEL_SIZE = 31
+ACCEPTABLE_ANGLE = 0.3
+
 
 
 def main():
-    img = cv.imread(r"C:\Users\onurb\pycharm_projects\Image_Tps\ImagesProjetL3\ImagesProjetL3\29.jpg")
-    #img = cv.imread(r"C:\Users\onurb\pycharm_projects\Image_Tps\ImagesProjetL3\ImagesProjetL3\13.jpg")
-    dessiner(img, "image")
+    img = cv.imread(r"C:\\Users\\onurb\\PycharmProjects\\Projet-Image\\training_data\\80.jpg")
+    #img = cv.imread(r"C:\\Users\\onurb\\pycharm_projects\\Image_Tps\\ImagesProjetL3\\ImagesProjetL3\\13.jpg")
+    #dessiner(img, "image")
+    print(img.shape[0])
     med = median(img)
     gray = cv.cvtColor(med, cv.COLOR_BGR2GRAY)
     line_detection(gray,img)
 
+    #dir = r"C:\Users\onurb\PycharmProjects\Projet-Image\training_data"
+    #test(dir)
 
+
+def extract_tableau(img_path):
+    img = cv.imread(img_path)
+    med = median(img)
+    gray = cv.cvtColor(med, cv.COLOR_BGR2GRAY)
+    tableau, board_limit = line_detection(gray, img)
+    return tableau, board_limit
 
 def median(img):
     """
     :param img: image de base en 1 ou 3 channels
     :return: image avec le filtre median appliqué
     """
-    med = cv.medianBlur(img, ksize = MEDIAN_KERNEL_SIZE)
-    dessiner(med, "med")
+    #kernel_size = get_kernel_size(img, MEDIAN_KERNEL_SIZE_COEFFICIENT)
+    #print(kernel_size)
+    med = cv.medianBlur(img, ksize = 31)
+    #dessiner(med, "med")
     return med
+
+def get_kernel_size(img, size_coef):
+    if (img.shape[0]//size_coef)%2 == 0:
+        return (img.shape[0]//size_coef) + 1
+    return img.shape[0]//size_coef
 
 def erosion(img):
     kernel = np.ones((5, 5), np.uint8)
@@ -41,7 +61,7 @@ def erosion(img):
 
     # Display the original and processed images side by side
     combined = np.hstack([img, erosion])
-    dessiner(combined, "erosion")
+    #dessiner(combined, "erosion")
     return erosion
 
 
@@ -83,22 +103,25 @@ def line_detection(gray,base_img):
             #print(f"coordinates (x1, y1): {l[1]}, {l[0]}, color : {base_img[l[1], l[0]]}")
             #print(f"coordinates (x1, y1): {l[1]}, {l[0]}, color : {base_img[l[1], l[0]]}")
 
-    lines_gray = filter_gray_lines(linesP, base_img)
+    """lines_gray = filter_gray_lines(linesP, base_img)
 
     if lines_gray is not None:
         for i in range(0, len(lines_gray)):
             l = linesP[i][0]
             cv.line(cdst_gray, (l[0], l[1]), (l[2], l[3]), (0, 0, 255), 3, cv.LINE_AA)
             #print(f"coordinates (x1, y1): {l[1]}, {l[0]}, color : {base_img[l[1], l[0]]}")
-            #print(f"coordinates (x1, y1): {l[1]}, {l[0]}, color : {base_img[l[1], l[0]]}")
+            #print(f"coordinates (x1, y1): {l[1]}, {l[0]}, color : {base_img[l[1], l[0]]}")"""
 
 
-    dessiner(cdstP, "probability")
+    #dessiner(cdstP, "probability")
     #dessiner(cdst_gray,"filtered")
 
     #filter the most centered ones
 
-    border_lines = filter2(linesP, base_img.shape[0], base_img.shape[1])
+    #if lines are found
+    border_lines = []
+    if linesP is not None:
+        border_lines = filter2(linesP, base_img.shape[0], base_img.shape[1])
 
     """
     l1,l2,l3,l4 = border_lines
@@ -116,11 +139,10 @@ def line_detection(gray,base_img):
         endpoint = draw_line((line[0], line[1]), (line[2], line[3]),cdst_filter)
         endpoints.append(endpoint)
 
-    dessiner(cdst_filter, "filter")
+    #dessiner(cdst_filter, "filter")
 
-    extracted_img = extraction_tableau(base_img, endpoints)
-
-    dessiner(extracted_img, "extracted")
+    extracted_img, board_limit = extraction_tableau(base_img, endpoints)
+    #dessiner(extracted_img, "extracted")
 
     #cv.imshow("Source", gray)
     #cv.imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst)
@@ -128,8 +150,10 @@ def line_detection(gray,base_img):
 
     #cv.waitKey()
 
+    return extracted_img, board_limit
 
-def filter_gray_lines(lines, base_img):
+
+"""def filter_gray_lines(lines, base_img):
     gray_lines = []
     for line in lines:
         x1, y1, x2, y2 = line[0]
@@ -161,7 +185,7 @@ def majoritory_gray(img, pixel_coordinates, tolerance = GRAY_TOLERANCE):
     if gray_counter >= 80:
         return True
     else:
-        return False
+        return False"""
 
 
 
@@ -233,7 +257,7 @@ def get_right_border(lines, midddle_length, up_border, down_border):
     return min_p1[0], min_p1[1], min_p2[0], min_p2[1]
 
 
-def is_horizontal(p1, p2, threshold=0.5):
+def is_horizontal(p1, p2, threshold=ACCEPTABLE_ANGLE):
     """
     Check if a line defined by two points is approximately horizontal.
     """
@@ -249,7 +273,7 @@ def is_horizontal(p1, p2, threshold=0.5):
     # check if the ratio is below the threshold
     return ratio < threshold
 
-def is_horizontal2(p1, p2, threshold=0.5): #environ 30 degre
+def is_horizontal2(p1, p2, threshold=ACCEPTABLE_ANGLE): #environ 20 degre
     """Check if the line formed by two points is approximately horizontal.
     """
     x1, y1 = p1
@@ -261,7 +285,7 @@ def is_horizontal2(p1, p2, threshold=0.5): #environ 30 degre
         angle = math.atan(dy / dx)
     return angle < threshold
 
-def is_vertical2(p1, p2, threshold=0.5): #environ 30 degre
+def is_vertical2(p1, p2, threshold=ACCEPTABLE_ANGLE): #environ 20 degre
     """Check if the line formed by two points is approximately vertical.
     """
     x1, y1 = p1
@@ -274,7 +298,7 @@ def is_vertical2(p1, p2, threshold=0.5): #environ 30 degre
     return angle < threshold
 
 
-def is_vertical(p1, p2, threshold=0.5):
+def is_vertical(p1, p2, threshold=ACCEPTABLE_ANGLE):
     """
     Check if a line defined by two points is approximately vertical.
     """
@@ -343,6 +367,9 @@ def extraction_tableau(img, end_points):
     """Extraction de tableau en mettant 0 pour les pixels qui sont pas sur les tableau par rapport aux bords trouvés"""
     extracted_img = img.copy()
 
+    if len(end_points) == 0:
+        return img, [0,img.shape[0],0,img.shape[1]]
+
     print(end_points)
     top_line = end_points[0]
     bottom_line = end_points[1]
@@ -363,7 +390,15 @@ def extraction_tableau(img, end_points):
             elif len(right_line) == 2 and is_right_of_line((x, y), right_line[0], right_line[1]):
                 extracted_img[y,x] = [0,0,0]
                 continue
-    return extracted_img
+
+    #get the bord limits
+    vertical_min = 0 if len(top_line) < 2 else min(top_line[0][1], top_line[1][1])
+    vertical_max = img.shape[0] if len(bottom_line) < 2 else max(bottom_line[0][1], bottom_line[1][1])
+    horizontal_min = 0 if len(left_line) < 2 else min(left_line[0][0], left_line[1][0])
+    horizontal_max = img.shape[1] if len(right_line) < 2 else max(right_line[0][0], right_line[1][0])
+    print("hello")
+    print([vertical_min, vertical_max, horizontal_min, horizontal_max])
+    return extracted_img, [vertical_min, vertical_max, horizontal_min, horizontal_max]
 def is_under_line(pixel, line_p1, line_p2):
     """
     Checks if a given pixel is below a line defined by two points.
@@ -430,6 +465,18 @@ def dessiner(img, name):
 	plt.imshow(img, vmin=0, vmax=255)
 	plt.show()
 
+def test(directory):
+
+    for i, file in enumerate(os.listdir(directory)):
+        if i == 0:
+            continue
+
+        img = cv.imread(os.path.join(directory, file))
+        # img = cv.imread(r"C:\Users\onurb\pycharm_projects\Image_Tps\ImagesProjetL3\ImagesProjetL3\13.jpg")
+        dessiner(img, "image")
+        med = median(img)
+        gray = cv.cvtColor(med, cv.COLOR_BGR2GRAY)
+        line_detection(gray, img)
 
 if __name__ == '__main__':
     main()

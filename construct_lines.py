@@ -1,14 +1,21 @@
+import os
+
 import numpy as np
 import cv2 as cv
-from RLSA import dessiner, apply_rlsa
+from RLSA import dessiner, apply_rlsa, MEDIAN_COMPONENT_SIZE
 from filter import filter_small_big_components
 from copy import deepcopy
+from rotation_outil import rotate_img
+from rotation_outil import get_ellipse
 
-MEDIAN_KERNEL_SIZE = 9
 
+MEDIAN_KERNEL_SIZE = 21
+MED_FUNCTION_COEF = 6
+EROSION_KERNEL_COEFFICIENT = 3
+DISTANCE_BETWEEN_WORD = 3
 
 def main():
-    img_path = r"C:\Users\onurb\PycharmProjects\Projet-Image\training_data\11.jpg"
+    img_path = r"C:\Users\onurb\PycharmProjects\Projet-Image\training_data\44.jpg"
     #buff = r"C:\Users\onurb\PycharmProjects\Projet-Image\component3.png"
     construct_lines(img_path)
     #buffer(buff)
@@ -16,26 +23,43 @@ def main():
 
 
 def construct_lines(img_path):
-    rlsa, border_image = apply_rlsa(img_path)
+    base_img = cv.imread(img_path)
+    rlsa, border_image, med_com_size, board_limit = apply_rlsa(img_path)
 
-    dessiner(rlsa,"rlsa")
+    #dessiner(rlsa,"rlsa")
     #apply median to remove lines
-    med = cv.medianBlur(rlsa, ksize = MEDIAN_KERNEL_SIZE)
+    #print(med_com_size//6)
+    med = cv.medianBlur(rlsa, ksize = med_function(med_com_size, base_img))
 
-    dessiner(med, "median")
+    #dessiner(med, "median")
+
+    #Apply an erosion
+    erosion_kernel_size = get_erosion_kernal_size(med_com_size)
+
+    erosion_kernel = np.ones((erosion_kernel_size, erosion_kernel_size), np.uint8)
+    erosion = cv.erode(rlsa, erosion_kernel, iterations=1)
+    #dessiner(erosion, "erosion")
+
+    #rotate image
+    """E = get_ellipse(med)
+    med = rotate_img(med, E)
+    ret2, med = cv.threshold(med, 0, 255, cv.THRESH_BINARY + cv.THRESH_OTSU)
+    dessiner(med,"rotated")"""
 
     #filter
-    #filter = filter_small_big_components(med)
+    filter = filter_small_big_components(erosion, board_limit)
 
-    #dessiner(filter, "median")
+    #dessiner(filter, "filter")
 
     #lines, words = get_lines(filter)
-    lines, contents, content_v_list = get_lines_v2(med)
+    lines, contents, content_v_list = get_lines_v2(filter)
 
     remove_subsets(lines, contents, border_image, content_v_list)
 
-
-    draw_lines(lines, border_image)
+    #border_image = rotate_img(border_image, E)
+    m, base_with_lines = draw_lines(lines, base_img)
+    dessiner(base_with_lines, "final")
+    return base_with_lines
 
 
 def buffer(img_path):
@@ -78,24 +102,15 @@ def get_lines(rlsa_images):
         #get the length of the world
         last_word_lengt = words[i-2][1][3] - words[i-2][1][1]
 
-        distance_between_words = 3*last_word_lengt
-        #print((x1,y1,x2,y2))
-        #print((words[i-1][1][0], words[i-1][1][1], words[i-1][1][2], words[i-1][1][3]))
+        distance_between_words = DISTANCE_BETWEEN_WORD*last_word_lengt
 
         #check if the words are on the same line and the distance between words are less than 2 times of the length
         center_y_coor_of_curr_word = (y2 + y1)/2
-        #print(f"{words[i-2][1][0]}, {x1}, {words[i-2][1][0] + distance_between_words}")
 
-        #print(
-        #    f"curr : {(x1, y1, x2, y2)} last {(words[i - 2][1][0], words[i - 2][1][1], words[i - 2][1][2], words[i - 2][1][3])}")
-        #print(words[i-2][1][1] - last_word_lengt//2 < center_y_coor_of_curr_word < words[i-2][1][3] + last_word_lengt//2)
+
 
         if words[i-2][1][1] - last_word_lengt//2 < center_y_coor_of_curr_word < words[i-2][1][3] + last_word_lengt//2 and words[i-2][1][0] < x1 < words[i-2][1][2] + distance_between_words:
             line.append([word, (x1, y1, x2, y2)])
-            #print(f"curr : {(x1,y1,x2,y2)} last {(words[i-2][1][0], words[i-2][1][1], words[i-2][1][2], words[i-2][1][3])}")
-            #dessiner(word, "curr")
-            #dessiner(words[i-2][0], "last")
-            #print(line)
             continue
         else:
             lines.append(line)
@@ -240,10 +255,6 @@ def delete_intersection(line1, line2, list1):
     to_remove = []
     for i in range(min(len(line1), len(line2))):
         if line1[len(line1) - 1 - i][1] == line2[len(line2) - 1 - i][1]:
-            #print((line1[len(line1) - 1 - i][1], line2[len(line2) - 1 - i][1]))
-        #if line1[len(line1) - 1 - i][1][2] == line2[len(line2) - 1 - i][1][2] and line1[len(line1) - 1 - i][1][3] == line2[len(line2) - 1 - i][1][3]:
-            #print("hello")
-            #line1.remove(line1[len(line1) - 1 - i])
             to_remove.append(len(line1) - 1 - i)
         else:
             break
@@ -284,43 +295,97 @@ def check_same(list):
             if elem is elem2:
                 continue
             if elem[-1] == elem2[-1]:
-                print(f"same elems : {elem}, {elem2}")
                 ind = (i,j)
                 same = True
                 break
-    print(same)
     return ind
 
 def draw_lines(lines, base_img):
     mask = np.zeros((base_img.shape[0], base_img.shape[1]), dtype=np.uint8)
     base = base_img.copy()
 
-    #print(lines)
 
-    for line in lines:
+    for i, line in enumerate(lines):
         if len(line) <= 0:
             continue
 
-        left_top = (line[0][1][0], line[0][1][1])
+        """left_top = (line[0][1][0], line[0][1][1])
         left_down = (line[0][1][0], line[0][1][3])
         right_top = (line[-1][1][2], line[-1][1][1])
-        right_down = (line[-1][1][2], line[-1][1][3])
+        right_down = (line[-1][1][2], line[-1][1][3])"""
 
-        #(start_pos, end_pos)
+        #get coordinates
+        coordinates = []
+        """for i, word in enumerate(line):
+            print(word)
+            left_top = (line[i][1][0], line[i][1][1])
+            left_down = (line[i][1][0], line[i][1][3])
+            right_top = (line[i][1][2], line[i][1][1])
+            right_down = (line[i][1][2], line[i][1][3])
+            coordinates.append([left_top[0], left_top[1]])
+            coordinates.append([left_down[0], left_down[1]])
+            coordinates.append([right_down[0], right_down[1]])
+            coordinates.append([right_top[0], right_top[1]])"""
+
+        left_top_coordinate = [(word[1][0], word[1][1]) for word in line]
+        left_down_coordinate = [(word[1][0], word[1][3]) for word in line]
+        right_down_coordinate = [(word[1][2], word[1][3]) for word in line]
+        right_top_coordinate = [(word[1][2], word[1][1]) for word in line]
+
+        #print(f"left down corner: {left_top_coordinate}")
+        #print(f"right down corner: {right_down_coordinate}")
+
+        #print(f"right top corner: {left_top_coordinate}")
+        #print(f"left top corner: {right_down_coordinate}")
+
+        #put down coordinates
+        for i in range(len(left_down_coordinate)):
+            coordinates.append([left_down_coordinate[i][0], left_down_coordinate[i][1]])
+            coordinates.append([right_down_coordinate[i][0], right_down_coordinate[i][1]])
+
+        #put top coordinates
+        for i in range(len(left_down_coordinate)-1, -1, -1):
+            coordinates.append([right_top_coordinate[i][0], right_top_coordinate[i][1]])
+            coordinates.append([left_top_coordinate[i][0], left_top_coordinate[i][1]])
 
         #draw polygon
-        pts = np.array([[left_top[0], left_top[1]], [left_down[0], left_down[1]], [right_down[0], right_down[1]], [right_top[0], right_top[1]]], np.int32)
+        #pts = np.array([[left_top[0], left_top[1]], [left_down[0], left_down[1]], [right_down[0], right_down[1]], [right_top[0], right_top[1]]], np.int32)
+        pts = np.array(coordinates, np.int32)
         pts = pts.reshape((-1, 1, 2))
         cv.polylines(base, [pts], True, (0, 255, 255), 2)
 
-        mask[left_top[1] : right_down[1], left_top[0] : right_down[0]] = 255
+        #mask[left_top[1] : right_down[1], left_top[0] : right_down[0]] = 255
         #cv.rectangle(base, (start_pos[0], start_pos[1]), (end_pos[0], end_pos[1]), (0, 255, 0), 3)
 
 
-    dessiner(mask,"mask")
-    dessiner(base, "base")
+    #dessiner(mask,"mask")
+    #dessiner(base, "base")
 
-    return mask
+    return mask, base
+
+
+def med_function(med, img):
+    if (med//MED_FUNCTION_COEF)%2 == 0:
+        return (med//MED_FUNCTION_COEF) + 1
+    else:
+        return med//MED_FUNCTION_COEF
+
+def get_erosion_kernal_size(med):
+    return med // EROSION_KERNEL_COEFFICIENT
+
+
+def test():
+    dir = r"C:\Users\onurb\PycharmProjects\Projet-Image\training_data"
+    for i, file in enumerate(os.listdir(dir)):
+        if i == 0:
+            continue
+        img_path = os.path.join(dir, file)
+        print(img_path)
+        # buff = r"C:\Users\onurb\PycharmProjects\Projet-Image\component3.png"
+        base_with_lines = construct_lines(img_path)
+        fin_dir = r"C:\Users\onurb\PycharmProjects\Projet-Image\results"
+        cv.imwrite(os.path.join(fin_dir, file), base_with_lines)
 
 if __name__ == '__main__':
     main()
+    #test()

@@ -14,30 +14,30 @@ def main():
 
     dessiner(binary_image, "binary")
 
-    filtered = filter_small_big_components(binary_image)
+    #filtered = filter_small_big_components(binary_image)
 
-    dessiner(filtered, "filtered")
-
-
+    #dessiner(filtered, "filtered")
 
 
-def filter_small_big_components(bin_img):
+
+
+def filter_small_big_components(bin_img, board_limit):
     filtered_img = bin_img.copy()
 
     num_labels, labels, stats, centroids = cv.connectedComponentsWithStats(filtered_img)
 
-    for i in range(2, num_labels):
+    for i in range(1, num_labels):
         #get the ratio of the component
         y1 = stats[i, cv.CC_STAT_TOP]
         y2 = y1 + stats[i, cv.CC_STAT_HEIGHT]
 
         component_length = y2 - y1
 
-        img_length = bin_img.shape[0]
+        #img_length = bin_img.shape[0]
+        board_lengh = board_limit[1] - board_limit[0]
 
-        ratio = component_length/img_length
+        ratio = component_length/board_lengh
 
-        #put 0 to big or small components
         if ratio < MIN_LENGTH_RATIO or ratio > MAX_LENGTH_RATIO:
             filtered_img[(labels == i)] = 0
 
