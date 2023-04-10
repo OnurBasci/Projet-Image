@@ -6,7 +6,7 @@ import sys
 import cv2 as cv
 import matplotlib.pyplot as plt
 from PIL import Image
-from scipy.ndimage import rotate
+#from scipy.ndimage import rotate
 
 
 #source: http://raphael.candelier.fr/?blog=Image%20Moments

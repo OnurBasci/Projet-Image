@@ -11,7 +11,7 @@ MEDIAN_KERNEL_SIZE = 21
 #the optimal thresh by volume seems like 133
 
 def main():
-    img_path = r"C:\Users\onurb\PycharmProjects\Projet-Image\training_data\14.jpeg"
+    img_path = r"training_data\\14.jpeg"
 
     border, E = extract_tableau(img_path)
 

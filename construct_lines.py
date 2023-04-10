@@ -5,8 +5,8 @@ import cv2 as cv
 from RLSA import dessiner, apply_rlsa, MEDIAN_COMPONENT_SIZE
 from filter import filter_small_big_components
 from copy import deepcopy
-from rotation_outil import rotate_img
-from rotation_outil import get_ellipse
+#from rotation_outil import rotate_img
+#from rotation_outil import get_ellipse
 
 
 MEDIAN_KERNEL_SIZE = 21
@@ -15,7 +15,7 @@ EROSION_KERNEL_COEFFICIENT = 3
 DISTANCE_BETWEEN_WORD = 3
 
 def main():
-    img_path = r"C:\Users\onurb\PycharmProjects\Projet-Image\training_data\8.jpg"
+    img_path = r"ImagesProjetL3\\8.png"
     #buff = r"C:\Users\onurb\PycharmProjects\Projet-Image\component3.png"
     construct_lines(img_path)
     #buffer(buff)
@@ -54,13 +54,13 @@ def construct_lines(img_path):
     #lines, words = get_lines(filter)
     lines, contents, content_v_list = get_lines_v2(filter)
 
-    print(lines)
 
     remove_subsets(lines, contents, border_image, content_v_list)
 
     #border_image = rotate_img(border_image, E)
     m, base_with_lines = draw_lines(lines, base_img)
     dessiner(base_with_lines, "final")
+    print(base_with_lines)
     return base_with_lines
 
 
