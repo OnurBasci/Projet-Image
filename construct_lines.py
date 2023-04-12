@@ -53,15 +53,14 @@ def construct_lines(img_path):
 
     #lines, words = get_lines(filter)
     lines, contents, content_v_list = get_lines_v2(filter)
-
-
+    
     remove_subsets(lines, contents, border_image, content_v_list)
 
     #border_image = rotate_img(border_image, E)
-    m, base_with_lines = draw_lines(lines, base_img)
+    m, base_with_lines, coord = draw_lines(lines, base_img)
     dessiner(base_with_lines, "final")
     print(base_with_lines)
-    return base_with_lines
+    return base_with_lines, lines ,coord
 
 
 def buffer(img_path):
@@ -305,7 +304,7 @@ def check_same(list):
 def draw_lines(lines, base_img):
     mask = np.zeros((base_img.shape[0], base_img.shape[1]), dtype=np.uint8)
     base = base_img.copy()
-
+    coordonees = []
 
     for i, line in enumerate(lines):
         if len(line) <= 0:
@@ -318,6 +317,7 @@ def draw_lines(lines, base_img):
 
         #get coordinates
         coordinates = []
+        coordonee = []
         """for i, word in enumerate(line):
             print(word)
             left_top = (line[i][1][0], line[i][1][1])
@@ -344,11 +344,18 @@ def draw_lines(lines, base_img):
         for i in range(len(left_down_coordinate)):
             coordinates.append([left_down_coordinate[i][0], left_down_coordinate[i][1]])
             coordinates.append([right_down_coordinate[i][0], right_down_coordinate[i][1]])
+            coordonee.append((left_down_coordinate[i][0], left_down_coordinate[i][1]))
+            coordonee.append((right_down_coordinate[i][0], right_down_coordinate[i][1]))
 
         #put top coordinates
         for i in range(len(left_down_coordinate)-1, -1, -1):
             coordinates.append([right_top_coordinate[i][0], right_top_coordinate[i][1]])
             coordinates.append([left_top_coordinate[i][0], left_top_coordinate[i][1]])
+            coordonee.append((right_top_coordinate[i][0], right_top_coordinate[i][1]))
+            coordonee.append((left_top_coordinate[i][0], left_top_coordinate[i][1]))
+        
+        coordonees.append(coordonee)
+
 
         #draw polygon
         #pts = np.array([[left_top[0], left_top[1]], [left_down[0], left_down[1]], [right_down[0], right_down[1]], [right_top[0], right_top[1]]], np.int32)
@@ -359,11 +366,9 @@ def draw_lines(lines, base_img):
         #mask[left_top[1] : right_down[1], left_top[0] : right_down[0]] = 255
         #cv.rectangle(base, (start_pos[0], start_pos[1]), (end_pos[0], end_pos[1]), (0, 255, 0), 3)
 
-
     #dessiner(mask,"mask")
     #dessiner(base, "base")
-
-    return mask, base
+    return mask, base, coordonees
 
 
 def med_function(med, img):
