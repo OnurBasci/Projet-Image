@@ -19,6 +19,9 @@ def dessiner(img, name):
     plt.imshow(img, vmin=0, vmax=255, cmap="gray")
     plt.show()
 
+
+def somme_img(m1,m2):
+    return m1 + m2
 img_path= r"ImagesProjetL3\\0.jpg"
 img = cv.imread(img_path)
 size=img.shape
@@ -33,24 +36,43 @@ for elem in data:
         point = (x,y)
         figure.append(point)
     figures.append(figure)
-mask_figures= []
-"""
-for figure in figures:
-    mask_figures.append(create_polygon_mask(figure,size[0],size[1]))
-    print(figure)
-"""
-i=0
-for mask in mask_figures:
-    i=i+1
-    dessinerbin(mask,i)
 
+mask_terrain= []
+
+
+for figure in figures:
+    mask_terrain.append(create_polygon_mask(figure,size[0],size[1]))
 
 base , lines ,coords = construct_lines(img_path)
-print(coords)
+
+mask_figures= []
 for coord in coords:
     mask_figures.append(create_polygon_mask(coord,size[0],size[1]))
 
+for maskT in mask_terrain:
+     taux= 0
+     for mask in mask_figures:
+        img_comp = maskT + mask
+        union= 0
+        inter= 0
+        for x in img_comp:
+            for pixel in x:
+                if pixel == 2:
+                    union += 1
+                    inter += 1
+                if pixel == 1:
+                    union += 1
+        taux_img = inter/union
+        if taux_img > taux:
+            taux = taux_img        
+"""
+i=0
+for mask in mask_terrain:
+    i=i+1
+    dessinerbin(mask,i)
+
 i=0
 for mask in mask_figures:
     i=i+1
     dessinerbin(mask,i)
+"""
