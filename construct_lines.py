@@ -15,7 +15,7 @@ EROSION_KERNEL_COEFFICIENT = 3
 DISTANCE_BETWEEN_WORD = 3
 
 def main():
-    img_path = r"ImagesProjetL3\\8.png"
+    img_path = r"ImagesProjetL3\\8.jpg"
     #buff = r"C:\Users\onurb\PycharmProjects\Projet-Image\component3.png"
     construct_lines(img_path)
     #buffer(buff)
