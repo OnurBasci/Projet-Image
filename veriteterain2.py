@@ -81,7 +81,18 @@ def true_positif_false_negatif(mask_terrain, mask_figures, seuil):
 
             count_inter = np.count_nonzero(inter_mask)
             count_union = np.count_nonzero(union_mask)
+
+            #pass if there is no intersection
+            if count_inter == 0:
+                continue
             current_taux = count_inter/count_union
+
+
+
+            """if count_union == 0:
+                print(f"count inter : {count_inter}")
+                print(f"count union : {count_union}")"""
+
 
             if current_taux > max_taux:
                 max_taux = current_taux
@@ -115,6 +126,11 @@ def faux_positif(mask_terrain, mask_figures, seuil):
 
             count_inter = np.count_nonzero(inter_mask)
             count_union = np.count_nonzero(union_mask)
+
+            # pass if there is no intersection
+            if count_inter == 0:
+                continue
+
             current_taux = count_inter / count_union
 
             if current_taux > max_taux:
@@ -125,14 +141,14 @@ def faux_positif(mask_terrain, mask_figures, seuil):
     print(f"list of faux positif {fp_taux}")
     fp = 0
     for taux in fp_taux:
-        if taux > seuil:
+        if taux < seuil:
             fp += 1
 
     return fp / len(fp_taux)
 
 #demo
-"""
-mask_terrain, mask_figures = get_terrain_figure("ImagesProjetL3\\0.json", "ImagesProjetL3\\0.jpg")
+
+"""mask_terrain, mask_figures = get_terrain_figure("ImagesProjetL3\\4.json", "ImagesProjetL3\\4.jpg")
 
 tp, fn = true_positif_false_negatif(mask_terrain, mask_figures, 0.4)
 
