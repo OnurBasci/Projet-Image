@@ -40,7 +40,7 @@ def median(img):
     """
     #kernel_size = get_kernel_size(img, MEDIAN_KERNEL_SIZE_COEFFICIENT)
     #print(kernel_size)
-    med = cv.medianBlur(img, ksize = 31)
+    med = cv.medianBlur(img, ksize = KERNEL_SIZE)
     #dessiner(med, "med")
     return med
 

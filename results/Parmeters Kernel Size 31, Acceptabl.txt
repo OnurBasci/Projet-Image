@@ -1,0 +1,3 @@
+Parmeters: Kernel Size 31, Acceptable Angle 0.3, Erosion_Kernel_Coefficient = 3, Distance_Between_Words = 3
+vrai postif 0.12290526405096718, faux negatif 0.8770947359490329, faux positif 0.9212458419038146
+fscore:0.11

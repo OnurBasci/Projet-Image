@@ -148,10 +148,10 @@ def faux_positif(mask_terrain, mask_figures, seuil):
 
 #demo
 
-"""mask_terrain, mask_figures = get_terrain_figure("ImagesProjetL3\\4.json", "ImagesProjetL3\\4.jpg")
+mask_terrain, mask_figures = get_terrain_figure("ImagesProjetL3\\11.json", "ImagesProjetL3\\11.jpg")
 
-tp, fn = true_positif_false_negatif(mask_terrain, mask_figures, 0.4)
+tp, fn = true_positif_false_negatif(mask_terrain, mask_figures, 0.3)
 
-fp = faux_positif(mask_terrain, mask_figures, 0.4)
+fp = faux_positif(mask_terrain, mask_figures, 0.3)
 
-print(f"vrai postif {tp}, faux negatif {fn}, faux positif {fp}")"""
+print(f"vrai postif {tp}, faux negatif {fn}, faux positif {fp}")

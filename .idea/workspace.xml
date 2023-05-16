@@ -6,8 +6,9 @@
   <component name="ChangeListManager">
     <list default="true" id="561b9f55-7739-42fd-8a8e-9c1dd6d5b046" name="Changes" comment="training images">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/bord_detection.py" beforeDir="false" afterPath="$PROJECT_DIR$/bord_detection.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/construct_lines.py" beforeDir="false" afterPath="$PROJECT_DIR$/construct_lines.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/succes.py" beforeDir="false" afterPath="$PROJECT_DIR$/succes.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/filter.py" beforeDir="false" afterPath="$PROJECT_DIR$/filter.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/veriteterain2.py" beforeDir="false" afterPath="$PROJECT_DIR$/veriteterain2.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -40,7 +41,7 @@
     &quot;last_opened_file_path&quot;: &quot;C:/Users/onurb/PycharmProjects/Projet-Image&quot;
   }
 }</component>
-  <component name="RunManager" selected="Python.succes">
+  <component name="RunManager" selected="Python.veriteterain2">
     <configuration name="construct_lines" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="Projet-Image" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -106,8 +107,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.succes" />
         <item itemvalue="Python.veriteterain2" />
+        <item itemvalue="Python.succes" />
         <item itemvalue="Python.construct_lines" />
       </list>
     </recent_temporary>

@@ -11,7 +11,7 @@ from copy import deepcopy
 
 MEDIAN_KERNEL_SIZE = 21
 MED_FUNCTION_COEF = 6
-EROSION_KERNEL_COEFFICIENT = 3
+EROSION_KERNEL_COEFFICIENT = 3   #to change
 DISTANCE_BETWEEN_WORD = 3
 
 def main():
@@ -26,12 +26,12 @@ def construct_lines(img_path):
     base_img = cv.imread(img_path)
     rlsa, border_image, med_com_size, board_limit = apply_rlsa(img_path)
 
-    #dessiner(rlsa,"rlsa")   !!!!
+    dessiner(rlsa,"rlsa")
     #apply median to remove lines
     #print(med_com_size//6)
     med = cv.medianBlur(rlsa, ksize = med_function(med_com_size, base_img))
 
-    #dessiner(med, "median")  !!!!
+    dessiner(med, "median")
 
     #Apply an erosion
     erosion_kernel_size = get_erosion_kernal_size(med_com_size)
@@ -49,7 +49,7 @@ def construct_lines(img_path):
     #filter
     filter = filter_small_big_components(erosion, board_limit)
 
-    #dessiner(filter, "filter")  !!!!
+    dessiner(filter, "filter")
 
     #lines, words = get_lines(filter)
     lines, contents, content_v_list = get_lines_v2(filter)
@@ -58,7 +58,7 @@ def construct_lines(img_path):
 
     #border_image = rotate_img(border_image, E)
     m, base_with_lines, coord = draw_lines(lines, base_img)
-    #dessiner(base_with_lines, "final") !!!!!
+    dessiner(base_with_lines, "final")
     #print(base_with_lines)
     return base_with_lines, lines ,coord
 

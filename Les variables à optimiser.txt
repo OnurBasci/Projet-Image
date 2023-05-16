@@ -1,0 +1,6 @@
+Les variables à optimiser
+
+KERNEL_SIZE in bord_detection
+ACCEPTABLE_ANGLE in bord_detection
+EROSION_KERNEL_COEFFICIENT in construct lines
+DISTANCE_BETWEEN_WORD in construct lines
