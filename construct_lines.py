@@ -11,11 +11,11 @@ from copy import deepcopy
 
 MEDIAN_KERNEL_SIZE = 21
 MED_FUNCTION_COEF = 6
-EROSION_KERNEL_COEFFICIENT = 3   #to change
+EROSION_KERNEL_COEFFICIENT = 6   #to change
 DISTANCE_BETWEEN_WORD = 3
 
 def main():
-    img_path = r"ImagesProjetL3\\8.jpg"
+    img_path = r"ImagesProjetL3\\0.jpg"
     #buff = r"C:\Users\onurb\PycharmProjects\Projet-Image\component3.png"
     construct_lines(img_path)
     #buffer(buff)
@@ -31,14 +31,14 @@ def construct_lines(img_path):
     #print(med_com_size//6)
     med = cv.medianBlur(rlsa, ksize = med_function(med_com_size, base_img))
 
-    dessiner(med, "median")
+    #dessiner(med, "median")
 
     #Apply an erosion
     erosion_kernel_size = get_erosion_kernal_size(med_com_size)
 
     erosion_kernel = np.ones((erosion_kernel_size, erosion_kernel_size), np.uint8)
     erosion = cv.erode(rlsa, erosion_kernel, iterations=1)
-    #dessiner(erosion, "erosion")   !!!!!!
+    dessiner(erosion, "erosion")
 
     #rotate image
     """E = get_ellipse(med)
@@ -49,7 +49,7 @@ def construct_lines(img_path):
     #filter
     filter = filter_small_big_components(erosion, board_limit)
 
-    dessiner(filter, "filter")
+    #dessiner(filter, "filter")
 
     #lines, words = get_lines(filter)
     lines, contents, content_v_list = get_lines_v2(filter)

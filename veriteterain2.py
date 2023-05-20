@@ -144,6 +144,9 @@ def faux_positif(mask_terrain, mask_figures, seuil):
         if taux < seuil:
             fp += 1
 
+    if len(fp_taux) == 0:
+        return 0
+
     return fp / len(fp_taux)
 
 #demo

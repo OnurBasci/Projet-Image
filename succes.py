@@ -4,11 +4,14 @@ from veriteterain2 import get_terrain_figure, true_positif_false_negatif, faux_p
 
 
 def main():
-    dir_path = "C:\\Users\\onurb\\PycharmProjects\\Projet-Image\\test_data"
+    dir_path = "C:\\Users\\onurb\\PycharmProjects\\Projet-Image\\test_data2"
     tp, fn, fp = get_average_succes_rates(dir_path)
+
+    f_score = (2 * tp)/(2 * tp + fp + fn)
 
     print("avarage results !!!!!")
     print(f"vrai postif {tp}, faux negatif {fn}, faux positif {fp}")
+    print(f"f score {f_score}")
 
 def get_average_succes_rates(dir_path):
     """
@@ -34,13 +37,14 @@ def get_average_succes_rates(dir_path):
             found2 = True
             image_file_name = file
         if found1 and found2:
+            print(image_file_name)
             file_counter += 1
             print(json_file_name)
             print(image_file_name)
             mask_terrain, mask_figures = get_terrain_figure(os.path.join(dir_path, json_file_name), os.path.join(dir_path, image_file_name))
 
-            tp, fn = true_positif_false_negatif(mask_terrain, mask_figures, 0.4)
-            fp = faux_positif(mask_terrain, mask_figures, 0.4)
+            tp, fn = true_positif_false_negatif(mask_terrain, mask_figures, 0.3)
+            fp = faux_positif(mask_terrain, mask_figures, 0.3)
 
             print(f"vrai postif {tp}, faux negatif {fn}, faux positif {fp}")
 
