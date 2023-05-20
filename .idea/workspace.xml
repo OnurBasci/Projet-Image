@@ -6,10 +6,7 @@
   <component name="ChangeListManager">
     <list default="true" id="561b9f55-7739-42fd-8a8e-9c1dd6d5b046" name="Changes" comment="training images">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Les variables à optimiser.txt" beforeDir="false" afterPath="$PROJECT_DIR$/Les variables à optimiser.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/construct_lines.py" beforeDir="false" afterPath="$PROJECT_DIR$/construct_lines.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/succes.py" beforeDir="false" afterPath="$PROJECT_DIR$/succes.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/veriteterain2.py" beforeDir="false" afterPath="$PROJECT_DIR$/veriteterain2.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

@@ -26,7 +26,7 @@ def construct_lines(img_path):
     base_img = cv.imread(img_path)
     rlsa, border_image, med_com_size, board_limit = apply_rlsa(img_path)
 
-    dessiner(rlsa,"rlsa")
+    #dessiner(rlsa,"rlsa")
     #apply median to remove lines
     #print(med_com_size//6)
     med = cv.medianBlur(rlsa, ksize = med_function(med_com_size, base_img))
@@ -38,7 +38,7 @@ def construct_lines(img_path):
 
     erosion_kernel = np.ones((erosion_kernel_size, erosion_kernel_size), np.uint8)
     erosion = cv.erode(rlsa, erosion_kernel, iterations=1)
-    dessiner(erosion, "erosion")
+    #dessiner(erosion, "erosion")
 
     #rotate image
     """E = get_ellipse(med)
@@ -58,7 +58,7 @@ def construct_lines(img_path):
 
     #border_image = rotate_img(border_image, E)
     m, base_with_lines, coord = draw_lines(lines, base_img)
-    dessiner(base_with_lines, "final")
+    #dessiner(base_with_lines, "final")
     #print(base_with_lines)
     return base_with_lines, lines ,coord
 
