@@ -1,2 +1,2 @@
 # Projet-Image
-Application permettant des textes sur le tableau.
+Application permettant la détection des textes sur les tableaux.
