@@ -1,2 +1,2 @@
 # Projet-Image
-Application permettant la détection des textes sur les tableaux.
+Python application that detects texts written on boards.
